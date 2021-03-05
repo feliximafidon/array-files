@@ -19,11 +19,14 @@ class FieldController extends Controller
         $path = $request->path ? $request->path : '/';
 
         $file = Storage::disk($disk)->putFile($path, $request->file('file'));
+        $url = config('filesystems.disks.' . $disk . '.driver') == 's3' ?
+            Storage::disk($disk)->temporaryUrl($file, now()->addMinutes(30)) :
+            Storage::disk($disk)->url($file);
 
         $data = [
             'originalName' => $request->file('file')->getClientOriginalName(),
             'name' => $file,
-            'url' => Storage::url($file),
+            'url' => $url,
         ];
 
         return $data;
